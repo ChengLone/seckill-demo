@@ -2,6 +2,7 @@ package com.wang.seckill.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wang.seckill.pojo.User;
+import org.springframework.stereotype.Component;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.wang.seckill.pojo.User;
  * @author ChengLone
  * @since 2021-10-10
  */
+@Component
 public interface UserMapper extends BaseMapper<User> {
 
 }

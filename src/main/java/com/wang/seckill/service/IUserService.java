@@ -2,6 +2,8 @@ package com.wang.seckill.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wang.seckill.pojo.User;
+import com.wang.seckill.vo.LoginVo;
+import com.wang.seckill.vo.RespBean;
 
 /**
  * <p>
@@ -13,4 +15,11 @@ import com.wang.seckill.pojo.User;
  */
 public interface IUserService extends IService<User> {
 
+    /**
+     * 登录
+     *
+     * @param loginVo
+     * @return
+     */
+    RespBean doLogin(LoginVo loginVo);
 }
