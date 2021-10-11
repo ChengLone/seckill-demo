@@ -8,4 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/login")
 @Slf4j
 public class loginController {
+
+    /**
+     * 跳转登录页面
+     * @return
+     */
+    @RequestMapping("/toLogin")
+    public String toLogin(){
+        return "login";
+    }
 }
