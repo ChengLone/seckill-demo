@@ -5,18 +5,24 @@ import com.wang.seckill.exception.GlobalException;
 import com.wang.seckill.mapper.UserMapper;
 import com.wang.seckill.pojo.User;
 import com.wang.seckill.service.IUserService;
+import com.wang.seckill.utils.CookieUtil;
 import com.wang.seckill.utils.MD5Utils;
+import com.wang.seckill.utils.UUIDUtil;
 import com.wang.seckill.utils.ValidatorUtil;
 import com.wang.seckill.vo.LoginVo;
 import com.wang.seckill.vo.RespBean;
 import com.wang.seckill.vo.RespBeanEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author ChengLone
@@ -28,6 +34,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     /**
      * 登录
      *
@@ -35,8 +44,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      * @return
      */
     @Override
-    public RespBean doLogin(LoginVo loginVo) {
-        String mobile =  loginVo.getMobile();
+    public RespBean doLogin(LoginVo loginVo, HttpServletRequest request, HttpServletResponse response) {
+        String mobile = loginVo.getMobile();
         String password = loginVo.getPassword();
 
 //        //先验证手机号和密码是否为空
@@ -58,10 +67,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         }
         //判断密码是否正确
-        if(!MD5Utils.fromPassToDBPass(password,user.getSalt()).equals(user.getPassword())){
+        if (!MD5Utils.fromPassToDBPass(password, user.getSalt()).equals(user.getPassword())) {
 //            return RespBean.error(RespBeanEnum.LOGIN_ERROR);
             throw new GlobalException(RespBeanEnum.LOGIN_ERROR);
         }
+
+        //生成cookie
+        String ticket = UUIDUtil.uuid();
+        redisTemplate.opsForValue().set("user:" + ticket, user);
+        request.getSession().setAttribute(ticket, user);
+        CookieUtil.setCookie(request, response, "userTicket", ticket);
         return RespBean.success();
     }
+
+    /**
+     * 根据cookie获取用户
+     *
+     * @param userTicket
+     * @return
+     */
+    @Override
+    public User getUserByCookie(String userTicket, HttpServletRequest request, HttpServletResponse response) {
+        if (StringUtils.isEmpty(userTicket)) {
+            return null;
+        }
+        User user = (User) redisTemplate.opsForValue().get("user:" + userTicket);
+
+        if (user != null) {
+            CookieUtil.setCookie(request, response, "userTicket", userTicket);
+        }
+
+        return user;
+    }
+
 }
