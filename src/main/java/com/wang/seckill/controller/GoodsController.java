@@ -1,6 +1,7 @@
 package com.wang.seckill.controller;
 
 import com.wang.seckill.pojo.User;
+import com.wang.seckill.service.IGoodsService;
 import com.wang.seckill.service.IUserService;
 import com.wang.seckill.service.impl.UserServiceImpl;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,9 @@ public class GoodsController {
     @Autowired
     private IUserService userService;
 
+    @Autowired
+    private IGoodsService goodsService;
+
 
     /**
      * 跳转到商品列表页
@@ -40,6 +44,7 @@ public class GoodsController {
 //            return "login";
 //        }
         model.addAttribute("user", user);
+        model.addAttribute("goodsList", goodsService.findGoodsVo());
         return "goodsList";
     }
 
